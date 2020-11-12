@@ -6,7 +6,8 @@
 ; P -> desativa pausa
 ; x -> reset, volta configuracoes para comeco
 ; q -> quit, finaliza programa imediatamente
-; t -> terminou, sinaliza que nao tem mais dados para leitura
+; s -> sensor da porta detectou algo
+; S -> sensor da porta liberado
 
 ;registradores
 ;ah sera usado na leitura
@@ -16,12 +17,21 @@
 ;bl andar atual do elevador
 ;bh proximo andar
 
-org 100h
+;referencia
+; Caracter      Hexa      Decimal
+;    1           31         49
+;    8           38         56
 
-reset:
+;    a           61         97
+;    h           68         104
 
-mov bl, '1' ; bl vai mostrar o andar atual do elevador
-mov bh, '1' ; bh vai indicar o proximo andar que o elevador vai
+;    p           70         112
+;    P           50         80
+;    x           71         113
+;    q           78         120
+;    s           73         115
+;    S           53         83
+
 
 ;rotina
 ;estou no andar tal
@@ -31,12 +41,21 @@ mov bh, '1' ; bh vai indicar o proximo andar que o elevador vai
 ;se encontrou:
 ;porta fechada
 ;subindo/descendo
-;estou no andar tal 
+;estou no andar tal
 
-call printa_andar
-call printa_abrindo
 
-call printa_aguardando
+org 100h
+
+reset:
+
+mov cl, '1' ; cl vai mostrar o andar atual do elevador
+mov ch, '1' ; ch vai indicar o proximo andar que o elevador vai
+
+
+;call printa_andar
+;call printa_abrindo
+
+;call printa_aguardando
     
 leitura:    
 ;leitura, valor fica em AL
@@ -80,62 +99,62 @@ jz oito
 cmp dl, 'p'
 jz para
 cmp dl, 'x'
-jmp reseta  
+jz reseta  
 cmp dl, 'q'
-jmp fim
+jz fim
 
 cmp dl, 0Dh
 jmp fim_leitura
 
 
 
-um:
-    mov ax, chamadas    ; AX <= endereco de chamadas
-    mov ax, 1 ;colocando 1 para andar 1 no meu vetor de chamadas
+um:  
+    mov bx, offset chamadas    ; AX <= endereco de chamadas
+    mov [bx], '1' ;colocando 1 para andar 1 no meu vetor de chamadas
     jmp leitura ;volta para procurar mais coisa para ler
 
 
 dois:
-    mov ax, chamadas   ; AX <= endereco de chamadas
-    add ax, 1
-    mov ax, 1 ;colocando 1 para andar 2 no meu vetor de chamadas
+    mov bx, offset chamadas   ; BX <= endereco de chamadas
+    add bx, 1
+    mov [bx], '1' ;colocando 1 para andar 2 no meu vetor de chamadas
     jmp leitura ;volta para procurar mais coisa para ler
 
 
 tres:
-    mov ax, chamadas     ; AX <= endereco de chamadas
-    add ax, 2
-    mov ax, 1 ;colocando 1 para andar 3 no meu vetor de chamadas
+    mov bx, offset chamadas     ; AX <= endereco de chamadas
+    add bx, 2
+    mov [bx], '1' ;colocando 1 para andar 3 no meu vetor de chamadas
     jmp leitura ;volta para procurar mais coisa para ler
     
 quatro:
-    mov ax, chamadas     ; AX <= endereco de chamadas
-    add ax, 3
-    mov ax, 1 ;colocando 1 para andar 4 no meu vetor de chamadas
+    mov bx, offset chamadas     ; AX <= endereco de chamadas
+    add bx, 3
+    mov [bx], '1' ;colocando 1 para andar 4 no meu vetor de chamadas
     jmp leitura ;volta para procurar mais coisa para ler
     
 cinco:
-    mov ax, chamadas     ; AX <= endereco de chamadas
-    add ax, 4
-    mov ax, 1 ;colocando 1 para andar 5 no meu vetor de chamadas
+    mov bx, offset chamadas     ; AX <= endereco de chamadas
+    add bx, 4
+    mov [bx], '1' ;colocando 1 para andar 5 no meu vetor de chamadas
     jmp leitura ;volta para procurar mais coisa para ler
     
 seis:
-    mov ax, chamadas     ; AX <= endereco de chamadas
-    add ax, 5
-    mov ax, 1 ;colocando 1 para andar 6 no meu vetor de chamadas
+    mov bx, offset chamadas     ; AX <= endereco de chamadas
+    add bx, 5
+    mov [bx], '1' ;colocando 1 para andar 6 no meu vetor de chamadas
     jmp leitura ;volta para procurar mais coisa para ler
     
 sete:
-    mov ax, chamadas     ; AX <= endereco de chamadas
-    add ax, 6
-    mov ax, 1 ;colocando 1 para andar 7 no meu vetor de chamadas
+    mov bx, offset chamadas     ; AX <= endereco de chamadas
+    add bx, 6
+    mov [bx], '1' ;colocando 1 para andar 7 no meu vetor de chamadas
     jmp leitura ;volta para procurar mais coisa para ler
     
 oito:
-    mov ax, chamadas     ; AX <= endereco de chamadas
-    add ax, 7
-    mov ax, 1 ;colocando 1 para andar 8 no meu vetor de chamadas
+    mov bx, offset chamadas     ; AX <= endereco de chamadas
+    add bx, 7
+    mov [bx], '1' ;colocando 1 para andar 8 no meu vetor de chamadas
     jmp leitura ;volta para procurar mais coisa para ler
     
 para:
@@ -151,6 +170,7 @@ reseta:
     call printa_fechando
     call printa_descendo
     jmp reset
+    ;TO DO: voltar variaveis para configuracoes originais
 
 fim_leitura:
     jmp fim
@@ -221,7 +241,13 @@ fim:
 ;0 default, 1 foi chamado
 ;observacao: essa "chamada" para o andar pode ter sido feita por botoes internos ou externos
 ;observacao2: se estiver no andar pode ficar com valor 1, quando sair sera modificado para 0
-chamadas: db '1', '0', '0', '0', '0', '0', '0', '0'
+chamadas db 31h, 30h, 30h, 30h, 30h, 30h, 30h, 30h
+
+
+;flags
+direcao db '1' ;1 -> subindo, 0 -> descendo
+porta   db '0' ;0 -> livre, 1 -> alguem na porta
+
 
 ; mensagens para imprimir        
 andar       dw " Andar atual: $"

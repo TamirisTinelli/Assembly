@@ -14,7 +14,7 @@ ORG 100h
 
 ;call teste_array_byte_2 
 
-call teste_array_word
+;call teste_array_word
 
 ;call teste_array_word_2
 
@@ -113,7 +113,7 @@ fim:
 VAR1   DB  5h
 VAR2   DW  5h
 
-arr1   DB  0h, 1h, 2h, 3h, 4h, 5h, 6h, 7h
+arr1   DB  0h, 1h, 2h, 3h, 4h, 5h, 6h, 7h  8h, 9h, 0Ah
 arr2   DW  0h, 1h, 2h, 3h, 4h, 5h, 6h, 7h, 8h, 9h, 0Ah 
 
 END
