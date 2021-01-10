@@ -14,32 +14,31 @@
 	fechada: .asciiz "porta fechada "
 	parado: .asciiz "parado "
 	enter: .asciiz "\n"
-	bote: .asciiz "\nBotao externo: "
+	bote: .asciiz "\nBotao externo:    "
 	bot1: .asciiz "\nBotao elevador 1: "
 	bot2: .asciiz "\nBotao elevador 2: " 
 	
-	#andar atual e de destino
-	b1a: .byte '0'
-	b1d: .byte '0'
-	b2a: .byte '0'
-	b2d: .byte '0'
+	#andar atual e de destino 
+	b1a: .byte '0' ' ' '\0' #marca fim de string para facilitar impressao
+	b1d: .byte '0' ' ' '\0'
+	b2a: .byte '0' ' ' '\0'
+	b2d: .byte '0' ' ' '\0'
 	
 	#vetores
-	be:	.byte  '0' '0' '0' '0' '0' '0' '0' '0' #botao externo
-	b1:	.byte  '0' '0' '0' '0' '0' '0' '0' '0' #botao interno elevador 1
-	b2:	.byte  '0' '0' '0' '0' '0' '0' '0' '0' #botao interno elevador 2
+	be:	.byte  '0' '0' '0' '0' '0' '0' '0' '0' '\0' #botao externo
+	b1:	.byte  '0' '0' '0' '0' '0' '0' '0' '0' '\0' #botao interno elevador 1
+	b2:	.byte  '0' '0' '0' '0' '0' '0' '0' '0' '\0' #botao interno elevador 2
 	
 	
 	#flags - (variavel em memoria que indica estado)
-	# 0 - Sim, 1 - Nao
-	terreo1: .byte 1 #Elevador 1 na Base (terreo)
-	topo1: .byte 0 #Elevador 1 no Topo (ultimo andar)
-	aberta1: .byte 1 #Porta 1 aberta
-	parado1: .byte 0 #Elevador 1 com funcionamento interrompido
-	terreo2: .byte 1 #Elevador 2 na Base (terreo)
-	topo2: .byte 0 #Elevador 2 no Topo (ultimo andar)
-	aberta2: .byte 1 #Porta 2 aberta
-	parado2: .byte 0 #Elevador 2 com funcionamento interrompido
+	terreo1: .byte '1' '\0' #Elevador 1 na Base (terreo)
+	topo1:   .byte '0' '\0' #Elevador 1 no Topo (ultimo andar)
+	aberta1: .byte 'A' ' ' '\0' #Porta 1 A - aberta F - fechada
+	parado1: .byte 'P' '\0' #Elevador 1 P - parado M - movendo
+	terreo2: .byte '1' '\0' #Elevador 2 na Base (terreo)
+	topo2:   .byte '0' '\0' #Elevador 2 no Topo (ultimo andar)
+	aberta2: .byte 'A' ' ' '\0' #Porta 2 A - aberta F - fechada
+	parado2: .byte 'P' '\0' #Elevador 2 P - parado M - movendo
 
 	#arquivo de log
 	log: .asciiz "log.txt"
@@ -75,12 +74,24 @@ escrever_log:
 	li   $v0, 15    
 	move $a0, $s0  
 	la   $a1, b1a
-	li   $a2, 1
+	li   $a2, 2
 	syscall
 	
 	li   $v0, 15    
 	move $a0, $s0  
 	la   $a1, b1d
+	li   $a2, 2
+	syscall
+	
+	li   $v0, 15    
+	move $a0, $s0  
+	la   $a1, aberta1
+	li   $a2, 2
+	syscall
+	
+	li   $v0, 15    
+	move $a0, $s0  
+	la   $a1, parado1
 	li   $a2, 1
 	syscall
 	
@@ -94,12 +105,24 @@ escrever_log:
 	li   $v0, 15    
 	move $a0, $s0  
 	la   $a1, b2a
-	li   $a2, 1
+	li   $a2, 2
 	syscall
 	
 	li   $v0, 15    
 	move $a0, $s0  
 	la   $a1, b2d
+	li   $a2, 2
+	syscall
+	
+	li   $v0, 15    
+	move $a0, $s0  
+	la   $a1, aberta2
+	li   $a2, 2
+	syscall
+	
+	li   $v0, 15    
+	move $a0, $s0  
+	la   $a1, parado2
 	li   $a2, 1
 	syscall
 	
@@ -107,10 +130,10 @@ escrever_log:
 	li   $v0, 15    
 	move $a0, $s0  
 	la   $a1, bote
-	li   $a2, 16
+	li   $a2, 19
 	syscall
 	
-	li $v0, 15    
+	li   $v0, 15    
 	move $a0, $s0  
 	la   $a1, be
 	li   $a2, 8
@@ -142,7 +165,78 @@ escrever_log:
 	la   $a1, b2
 	li   $a2, 8
 	syscall
+
+print_tela:
+	#elevador 1
+	li   $v0, 4    
+	la   $a0, e1
+	syscall
 	
+	li   $v0, 4 
+	la   $a0, b1a
+	syscall
+	
+	li   $v0, 4 
+	la   $a0, b1d
+	syscall
+	
+	li   $v0, 4 
+	la   $a0, aberta1
+	syscall
+	
+	li   $v0, 4  
+	la   $a0, parado1
+	syscall
+	
+	
+	#elevador 2
+	li   $v0, 4      
+	la   $a0, e2
+	syscall
+	
+	li   $v0, 4 
+	la   $a0, b2a
+	syscall
+	
+	li   $v0, 4 
+	la   $a0, b2d
+	syscall
+	
+	li   $v0, 4 
+	la   $a0, aberta2
+	syscall
+	
+	li   $v0, 4  
+	la   $a0, parado2
+	syscall
+	
+	#botao externo
+	li   $v0, 4     
+	la   $a0, bote
+	syscall
+	
+	li   $v0, 4 
+	la   $a0, be
+	syscall
+	
+	#botao interno 1
+	li   $v0, 4  
+	la   $a0, bot1
+	syscall
+	
+	li   $v0, 4
+	la   $a0, b1
+	syscall
+
+	
+	#botao interno 2
+	li   $v0, 4  
+	la   $a0, bot2
+	syscall
+	
+	li   $v0, 4 
+	la   $a0, b2
+	syscall
 
 entrada: #TO DO
 
